@@ -2,10 +2,17 @@ package controller
 
 import (
 	"database/sql"
+	"encoding/json"
 	"net/http"
-	"scrapper-web/config"
 	"scrapper-web/internal/usecase"
 )
+
+type HttpResponse struct {
+    Error error
+    Success bool
+    Code int
+    Message string
+}
 
 
 func ScrapperController(db *sql.DB) http.HandlerFunc {
@@ -14,13 +21,22 @@ func ScrapperController(db *sql.DB) http.HandlerFunc {
             http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
             return
         }
-        scrapperOrder, err := usecase.ParseScrapperOrder(r)
-        if err != nil {
-            http.Error(w, err.Error(), http.StatusBadRequest)
+        err := usecase.InsertScrapperOrder(r, db)
+        if !err.Success {
+            http.Error(w, err.Error.Error(), http.StatusBadRequest)
             return
         }
-        // TO DO: MOVE THIS TO THE USECASE METHOD ParseScrapperOrder and rename it to SaveScrapperOrder
-        config.InsertData(db, scrapperOrder.Url)
-        defer r.Body.Close()
+
+        response := HttpResponse{
+			Error:   nil,
+			Success: true,
+			Code:    http.StatusCreated,
+			Message: "Scrapper order created",
+		}
+
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(response)
+
+		defer r.Body.Close()
     }
 }
