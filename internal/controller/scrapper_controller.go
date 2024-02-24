@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 	"scrapper-web/config"
-	"scrapper-web/usecase"
+	"scrapper-web/internal/usecase"
 )
 
 
@@ -19,6 +19,7 @@ func ScrapperController(db *sql.DB) http.HandlerFunc {
             http.Error(w, err.Error(), http.StatusBadRequest)
             return
         }
+        // TO DO: MOVE THIS TO THE USECASE METHOD ParseScrapperOrder and rename it to SaveScrapperOrder
         config.InsertData(db, scrapperOrder.Url)
         defer r.Body.Close()
     }

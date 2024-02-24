@@ -3,7 +3,7 @@ package usecase
 import (
 	"encoding/json"
 	"net/http"
-	Models "scrapper-web/model"
+	Models "scrapper-web/internal/model"
 )
 
 func ParseScrapperOrder(r *http.Request) (Models.ScrapperOrder, error) {

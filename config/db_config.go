@@ -7,8 +7,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func InitDB(filepath string) *sql.DB {
-    db, err := sql.Open("sqlite3", filepath)
+func InitDB(driverName string, dataSourceName string) *sql.DB {
+    db, err := sql.Open(driverName, dataSourceName)
     if err != nil {
         log.Fatal(err)
     }
@@ -25,6 +25,15 @@ func InitDB(filepath string) *sql.DB {
     return db
 }
 
+func GetDb(driverName string, dataSourceName string) *sql.DB {
+    db, err := sql.Open(driverName, dataSourceName)
+    if err != nil {
+        log.Fatal(err)
+    }
+    return db
+}
+
+// TODO: Move this function to a repository package for better separation of concerns
 func InsertData(db *sql.DB, valeur string) {
     insertSQL := `INSERT INTO scrapperOrder(url) VALUES (?)`
     statement, err := db.Prepare(insertSQL)
