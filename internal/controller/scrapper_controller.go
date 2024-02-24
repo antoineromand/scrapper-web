@@ -4,16 +4,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
+	"scrapper-web/internal/common"
 	"scrapper-web/internal/usecase"
 )
-
-type HttpResponse struct {
-    Error error
-    Success bool
-    Code int
-    Message string
-}
-
 
 func ScrapperController(db *sql.DB) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +20,7 @@ func ScrapperController(db *sql.DB) http.HandlerFunc {
             return
         }
 
-        response := HttpResponse{
+        response := common.HttpResponse{
 			Error:   nil,
 			Success: true,
 			Code:    http.StatusCreated,
