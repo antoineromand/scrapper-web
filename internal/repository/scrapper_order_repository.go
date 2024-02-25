@@ -28,7 +28,7 @@ func (r *ScrapperOrderRepository) InsertScrapperOrder(url string) error {
 	return nil
 }
 
-func (r *ScrapperOrderRepository) GetScrapperOrder() ([]Models.ScrapperOrder, error) {
+func (r *ScrapperOrderRepository) GetScrapperOrders() ([]Models.ScrapperOrder, error) {
 	rows, err := r.DB.Query("SELECT id, url FROM scrapperOrder")
 	if err != nil {
 		log.Fatalln(err)
