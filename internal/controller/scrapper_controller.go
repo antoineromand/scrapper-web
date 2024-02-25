@@ -5,22 +5,35 @@ import (
 	"encoding/json"
 	"net/http"
 	"scrapper-web/internal/common"
+	Models "scrapper-web/internal/model"
 	"scrapper-web/internal/usecase"
 )
 
 func ScrapperController(db *sql.DB) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
-        if r.Method != "POST" {
-            http.Error(w, "Méthode non autorisée", http.StatusMethodNotAllowed)
-            return
-        }
-        err := usecase.InsertScrapperOrder(r, db)
-        if !err.Success {
-            http.Error(w, err.Error.Error(), http.StatusBadRequest)
-            return
-        }
 
-        response := common.HttpResponse{
+        switch r.Method {
+		case "GET":
+			GetAllScrapperOrder(db, r, w)
+		case "POST":
+			AddScrapperOrder(db, r, w)
+		}
+    }
+}
+
+func AddScrapperOrder(db *sql.DB, r *http.Request, w http.ResponseWriter) {
+		var scrapperOrder Models.ScrapperOrder
+		err := json.NewDecoder(r.Body).Decode(&scrapperOrder)
+		if err != nil {
+			return
+		}
+		res := usecase.InsertScrapperOrder(scrapperOrder, db)
+		if !res.Success {
+			http.Error(w, res.Error.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		response := common.HttpResponse{
 			Error:   nil,
 			Success: true,
 			Code:    http.StatusCreated,
@@ -31,5 +44,25 @@ func ScrapperController(db *sql.DB) http.HandlerFunc {
 		json.NewEncoder(w).Encode(response)
 
 		defer r.Body.Close()
-    }
+}
+
+func GetAllScrapperOrder(db *sql.DB, r *http.Request, w http.ResponseWriter) {
+	orders, err := usecase.GetAllScrapperOrder(r, db)
+	if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		response := common.HttpGetResponse{
+			HttpResponse: common.HttpResponse{
+				Error:   nil,
+				Success: true,
+				Code:    http.StatusOK,
+				Message: "Scrapper orders retrieved",
+			},
+			Data: orders,
+		}
+
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(response)	
 }
