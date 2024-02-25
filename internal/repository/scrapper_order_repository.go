@@ -1,18 +1,18 @@
 package repository
 
 import (
+	"database/sql"
 	"log"
-	"scrapper-web/config"
+	Models "scrapper-web/internal/model"
 )
 type ScrapperOrderRepository struct {
-	BaseRepository
+	DB *sql.DB
 }
 
 
 func (r *ScrapperOrderRepository) InsertScrapperOrder(url string) error {
-	db := config.GetDB()
 	insertSQL := `INSERT INTO scrapperOrder(url) VALUES (?)`
-    statement, err := db.Prepare(insertSQL)
+    statement, err := r.DB.Prepare(insertSQL)
     if err != nil {
         log.Fatalln(err)
     }
@@ -26,4 +26,29 @@ func (r *ScrapperOrderRepository) InsertScrapperOrder(url string) error {
 		return err
 	}
 	return nil
+}
+
+func (r *ScrapperOrderRepository) GetScrapperOrder() ([]Models.ScrapperOrder, error) {
+	rows, err := r.DB.Query("SELECT id, url FROM scrapperOrder")
+	if err != nil {
+		log.Fatalln(err)
+		return nil, err
+	}
+	defer rows.Close()
+	var orders []Models.ScrapperOrder
+	for rows.Next() {
+		var order Models.ScrapperOrder
+        if err := rows.Scan(&order.Id, &order.Url); err != nil {
+            log.Printf("Error while reading a row : %v", err)
+            return nil, err
+        }
+        orders = append(orders, order)
+	}
+
+	if err = rows.Err(); err != nil {
+        log.Fatalln(err)
+        return nil, err
+    }
+
+	return orders, nil
 }
