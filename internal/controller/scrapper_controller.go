@@ -3,6 +3,7 @@ package controller
 import (
 	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
 	"scrapper-web/internal/common"
 	Models "scrapper-web/internal/model"
@@ -47,22 +48,22 @@ func AddScrapperOrder(db *sql.DB, r *http.Request, w http.ResponseWriter) {
 }
 
 func GetAllScrapperOrder(db *sql.DB, r *http.Request, w http.ResponseWriter) {
-	orders, err := usecase.GetAllScrapperOrder(r, db)
-	if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+    orders, err := usecase.GetAllScrapperOrder(r, db)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
 
-		response := common.HttpGetResponse{
-			HttpResponse: common.HttpResponse{
-				Error:   nil,
-				Success: true,
-				Code:    http.StatusOK,
-				Message: "Scrapper orders retrieved",
-			},
-			Data: orders,
-		}
+    response := common.HttpResponse{
+        Error:   nil,
+        Success: true,
+        Code:    http.StatusOK,
+        Message: "Scrapper orders retrieved",
+        Data:    orders,
+    }
 
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(response)	
+    w.WriteHeader(http.StatusOK)
+    if err := json.NewEncoder(w).Encode(response); err != nil {
+        log.Println("Failed to encode response:", err)
+    }
 }

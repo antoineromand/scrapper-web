@@ -24,3 +24,5 @@ go.work
 
 scrapper-web
 todo.txt
+
+scrapper_db.db
